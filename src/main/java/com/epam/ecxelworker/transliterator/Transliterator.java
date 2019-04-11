@@ -1,40 +1,31 @@
 package com.epam.ecxelworker.transliterator;
 
-import com.epam.ecxelworker.PropertiesLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 @Service
 public class Transliterator {
+
+
     @Autowired
-    PropertiesLoader propertiesLoader;
+    @Qualifier("namesProperty")
+    private Map<String, String> namesMap;
 
-    Map<String, String> namesMap;
-    Map<String, String> lettersMap;
+    @Autowired
+    @Qualifier("lettersProperty")
+    private Map<String, String> lettersMap;
 
-
-    public void run() {
-        System.out.println("here");
-        Properties nameProperties = propertiesLoader.getNameProperties();
-        Properties lettersProperties = propertiesLoader.getLettersProperties();
-        namesMap = getMapFromProperties(nameProperties);
-        lettersMap =
-                getMapFromProperties(lettersProperties);
-
-
-        String word = "Александр Филатов";
-        String[] words = word.split("\\s");
-        StringBuffer stringBuffer = new StringBuffer();
+    public String transliterateField(String field) {
+        StringBuilder outWord = new StringBuilder("");
+        String[] words = field.split("\\s");
         for (String subStr : words) {
-            System.out.println(transliterateWord(subStr));
+            outWord.append(transliterateWord(subStr)).append(" ");
         }
+        return outWord.toString();
     }
-
-
     private String transliterateWord(String word) {
         word = word.toLowerCase();
         String outWord = null;
@@ -48,12 +39,11 @@ public class Transliterator {
         }
         if (!findName) {
             char[] chars = word.toCharArray();
-            outWord = transliterateChar(chars);
+            outWord = transliterateChars(chars);
         }
         return outWord.substring(0, 1).toUpperCase() + outWord.substring(1);
     }
-
-    private String transliterateChar(char[] chars) {
+    private String transliterateChars(char[] chars) {
         StringBuilder outWord = new StringBuilder("");
         for (char aChar : chars) {
             for (String key : lettersMap.keySet()) {
@@ -64,14 +54,6 @@ public class Transliterator {
             }
         }
         return outWord.toString();
-    }
-
-
-    private Map<String, String> getMapFromProperties(Properties properties) {
-        Map<String, String> map = new HashMap<>();
-        for (String name : properties.stringPropertyNames())
-            map.put(name, properties.getProperty(name));
-        return map;
     }
 
 

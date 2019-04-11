@@ -3,14 +3,9 @@ package com.epam.ecxelworker;
 import com.epam.ecxelworker.consolidation.ConsolidationWorker;
 import com.epam.ecxelworker.file.ExcelFileWorker;
 import com.epam.ecxelworker.transliterator.Transliterator;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Iterator;
 
 @Service
 public class Application {
@@ -39,7 +34,10 @@ public class Application {
 
         XSSFWorkbook xssfWorkbook2 = fileWorker.readExcelBook(filename);
         XSSFWorkbook xssfWorkbook = fileWorker.readExcelBook(filename2);
-        transliterator.run();
+
+        String name = "Александер Филатов";
+        System.out.println(transliterator.transliterateField(name));
+
 
 //        fileWorker.saveExcelBook(consolidationWorker
 //                        .mergeContentIntoTable(xssfWorkbook, xssfWorkbook2),
