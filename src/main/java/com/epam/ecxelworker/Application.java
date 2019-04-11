@@ -2,6 +2,7 @@ package com.epam.ecxelworker;
 
 import com.epam.ecxelworker.consolidation.ConsolidationWorker;
 import com.epam.ecxelworker.file.ExcelFileWorker;
+import com.epam.ecxelworker.transliterator.Transliterator;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -18,11 +19,15 @@ public class Application {
     @Autowired
     ConsolidationWorker consolidationWorker;
 
+    @Autowired
+    Transliterator transliterator;
+
 
     public void runConsoleApplication() {
         System.out.println("Выберите действие");
         System.out.println("1 - смержить 2 таблицы в одну");
-        System.out.println("2 - транслитерировать поля (имя и фамилия)");
+        System.out.println("2 - транслитерировать поля ");
+        System.out.println("0 - Выход");
 
         String filename =
                 "D:/Filatov/geekenglish/ecxelworker/src/main" +
@@ -34,17 +39,12 @@ public class Application {
 
         XSSFWorkbook xssfWorkbook2 = fileWorker.readExcelBook(filename);
         XSSFWorkbook xssfWorkbook = fileWorker.readExcelBook(filename2);
+        transliterator.run();
 
+//        fileWorker.saveExcelBook(consolidationWorker
+//                        .mergeContentIntoTable(xssfWorkbook, xssfWorkbook2),
+//                "name2.xlsx");
 
-        fileWorker.saveExcelBook(consolidationWorker
-                        .mergeContentIntoTable(xssfWorkbook, xssfWorkbook2),
-                "name2.xlsx");
-
-
-        XSSFSheet myExcelSheet = xssfWorkbook.getSheetAt(0);
-
-
-        XSSFRow row = myExcelSheet.getRow(0);
 
     }
 

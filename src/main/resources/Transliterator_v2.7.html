@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Transliteration Tool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+          integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser-polyfill.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="/">
+        Transliteration Tool
+    </a>
+</nav>
+
+<div id="app">
+    <div class="container-fluid mt-2 pb-5 pl-lg-3 pl-lg-3">
+        <div class="row">
+            <div class="col-6">
+                <ul class="nav nav-pills">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" v-bind:class="[{ active: !multiline }]"
+                           @click="multiline=false; fullReset();">Single
+                            line</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" v-bind:class="[{ active: multiline }]"
+                           @click="multiline=true; fullReset();">Multi
+                            line</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-6">
+                <ul class="nav nav-pills justify-content-end">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" v-bind:class="[{ active: mode === 'RUSENG' }]"
+                           @click="changeLang('RUSENG')">RUS > ENG</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" v-bind:class="[{ active: mode === 'ENGRUS' }]"
+                           @click="changeLang('ENGRUS')">ENG > RUS</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row" v-if="!multiline">
+            <div class="col-l2 m-3 w-100">
+                <div class="card w-100" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Enter a name</h5>
+                        <div class="input-group">
+                            <input type="text" autofocus class="form-control input-lg" v-model="singleInput"
+                                   placeholder="For example, Иван Иванов" @keyup="processSingleStringMode()"/>
+                            <button class="btn btn-primary bg-danger border-0 ml-2" @click="singleInput = ''"
+                                    type="button"
+                                    data-toggle="tooltip" data-placement="top" title="Clear input">
+                                <i class="fa fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        <div v-if="this.warnings.length > 0 && singleInput.length > 0" class="alert alert-danger mt-3">
+                            <span>{{warnings[0][1]}} </span>
+                            <span>{{warnings[0][0]}} </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 mt-3 col-md-6" v-if="singleInput.length > 0 && warnings.length == 0">
+                <div class="card w-100" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Transliteration for UPSA</h5>
+                        <div class="input-group">
+                            <input class="form-control upsaSingle" :value="this.singleResult.upsa">
+                            <button class="btn btn-primary border-0 ml-2"
+                                    @click="copySingleNameToClipboard('upsaSingle')"
+                                    data-toggle="tooltip" data-placement="top" title="Copy value">
+                                <i class="fa fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 mt-3 col-md-6" v-if="singleInput.length > 0 && warnings.length == 0">
+                <div class="card w-100" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Transliteration for Staffing Desk</h5>
+                        <div class="input-group">
+                            <input class="form-control taleoSingle" :value="this.singleResult.taleo">
+                            <button class="btn btn-primary border-0 ml-2"
+                                    @click="copySingleNameToClipboard('taleoSingle')"
+                                    data-toggle="tooltip" data-placement="top" title="Copy value" type="submit">
+                                <i class="fa fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row" v-if="multiline">
+
+            <div class="col-12 col-md-4 mt-3 w-100">
+                <div class="card w-100" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Enter names
+                            <button class="btn btn-primary bg-danger border-0 ml-2 float-right"
+                                    @click="multiInput = ''; processMultiStringMode();" type="button"
+                                    data-toggle="tooltip"
+                                    data-placement="top" title="Clear input">
+                                <i class="far fa-trash-alt"></i>
+                            </button>
+                        </h5>
+                        <p><textarea class="form-control" v-model="multiInput" @keypress="warnings = [];"
+                                     @keyup="processMultiStringMode()"
+                                     rows="10"></textarea></p>
+                        <div v-if="warnings.length > 0 && multiInput.length > 0" class="alert alert-danger mt-3">
+                            <span class="small d-block mt-1" v-for="warning in warnings">{{warning[0]}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4 mt-3 w-100">
+                <div class="card w-100" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Transliteration for UPSA</h5>
+                        <table class="table table-sm table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">Full name
+                                    <button class="btn btn-sm btn-primary border-0 ml-1" data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Copy values" @click="copyTableToClipboard('upsa', 'full')">
+                                        <i class="fa fa-copy"></i>
+                                    </button>
+                                </th>
+                                <th scope="col">First name
+                                    <button class="btn btn-sm btn-primary border-0 ml-1" data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Copy values" @click="copyTableToClipboard('upsa', 'first')">
+                                        <i class="fa fa-copy"></i>
+                                    </button>
+                                </th>
+                                <th scope="col">Last name
+                                    <button class="btn btn-sm btn-primary border-0 ml-1" data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Copy values" @click="copyTableToClipboard('upsa', 'last')">
+                                        <i class="fa fa-copy"></i>
+                                    </button>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="human in multiResult.upsa">
+                                <td>{{human.full}}</td>
+                                <td>{{human.first}}</td>
+                                <td>{{human.last}}</td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4 mt-3 w-100">
+                <div class="card w-100" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Transliteration for Staffing Desk</h5>
+                        <table class="table table-sm table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">Full name
+                                    <button class="btn btn-sm btn-primary border-0 ml-1" data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Copy values" @click="copyTableToClipboard('taleo', 'full')">
+                                        <i class="fa fa-copy"></i>
+                                    </button>
+                                </th>
+                                <th scope="col">First name
+                                    <button class="btn btn-sm btn-primary border-0 ml-1" data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Copy values" @click="copyTableToClipboard('taleo', 'first')">
+                                        <i class="fa fa-copy"></i>
+                                    </button>
+                                </th>
+                                <th scope="col">Last name
+                                    <button class="btn btn-sm btn-primary border-0 ml-1" data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Copy values" @click="copyTableToClipboard('taleo', 'last')">
+                                        <i class="fa fa-copy"></i>
+                                    </button>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="human in multiResult.taleo">
+                                <td>{{human.full}}</td>
+                                <td>{{human.first}}</td>
+                                <td>{{human.last}}</td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <textarea class="hiddenCopyArea" style="opacity: 0; width: 1px;" id="copyArea"></textarea>
+        </div>
+
+    </div>
+
+    <footer class="page-footer font-small blue fixed-bottom bg-secondary">
+        <div class="footer-copyright text-center py-3 text-white">Transliteration Tool v2.7 © 2018 EPAM RD Ryazan</div>
+    </footer>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+
+            multiline: true,
+            mode: "RUSENG",
+            warnings: [],
+
+            singleInput: '',
+            singleResult: {
+                upsa: '',
+                taleo: ''
+            },
+
+            multiInput: '',
+            multiResult: {
+                upsa: [],
+                taleo: []
+            },
+
+            model: function () {
+                /*
+                    Combinations of letters are arranged in priority order of replacement
+                    This is more necessary for ENGRUS mode
+                */
+
+                var commonRusEngTransliterationRule = {
+                    firstNames: {
+                        "алексей": "alexey",
+                        "александр": "alexander",
+                        "андрей ": "andrey",
+                        "анатолий": "anatoly",
+                        "андрей": "andrey",
+                        "антон": "anton",
+                        "арсений": "arseniy",
+                        "артем": "artem",
+                        "алевтина": "alevtina",
+                        "александра": "alexandra",
+                        "анастасия": "anastasiya",
+                        "анна": "anna",
+                        "арина": "arina",
+                        "баходур": "bahodur",
+                        "борис": "boris",
+                        "виктор": "viktor",
+                        "виталий": "vitaly",
+                        "вадим": "vadim",
+                        "валерий": "valery",
+                        "виссарион": "vissarion",
+                        "василий": "vasily",
+                        "всеволод": "vsevolod",
+                        "владимир": "vladimir",
+                        "вячеслав": "vyacheslav",
+                        "валентина": "valentina",
+                        "валерия": "valeriya",
+                        "вера": "vera",
+                        "вероника": "veronika",
+                        "виктория": "victoriya",
+                        "георгий": "georgiy",
+                        "григорий": "grigory",
+                        "галина": "galina",
+                        "даниил": "daniil ",
+                        "денис": "denis",
+                        "дмитрий": "dmitry",
+                        "дарья": "darya",
+                        "диана": "diana",
+                        "егор": "egor",
+                        "евгений": "evgeny",
+                        "евгения": "evgenia",
+                        "екатерина": "ekaterina",
+                        "елена": "elena",
+                        "елизавета": "elizaveta",
+                        "илья": "ilya",
+                        "игорь": "igor",
+                        "иван": "ivan",
+                        "ирина": "irina",
+                        "кирилл": "kirill",
+                        "константин": "konstantin",
+                        "клим": "klim",
+                        "кира": "kira",
+                        "ксения": "kseniya ",
+                        "любовь": "lyubov",
+                        "людмила": "liudmila",
+                        "лилия": "liliya",
+                        "максим": "maxim",
+                        "михаил": "mikhail",
+                        "маргарита": "margarita",
+                        "марина": "marina",
+                        "мария": "maria",
+                        "никита": "nikita",
+                        "николай": "nikolay",
+                        "наталья": "natalia",
+                        "наталия": "nataliya",
+                        "нина": "nina",
+                        "надежда": "nadezhda",
+                        "оксана": "oksana",
+                        "ольга": "olga",
+                        "олег": "oleg",
+                        "павел": "pavel ",
+                        "полина": "polina",
+                        "питер": "peter",
+                        "прохор": "prokhor",
+                        "родион": "rodion",
+                        "роман": "roman",
+                        "руслан": "ruslan",
+                        "сергей": "sergey",
+                        "семен": "semen",
+                        "станислав": "stanislav",
+                        "степан": "stepan",
+                        "светлана": "svetlana ",
+                        "татьяна": "tatiana",
+                        "юлия": "julia",
+                        "юрий": "yuri",
+                        "яков": "yakov",
+                        "яна": "iana"
+                    },
+                    "а": "a",
+                    "б": "b",
+                    "в": "v",
+                    "г": "g",
+                    "д": "d",
+                    "е": "e",
+                    "ё": "e",
+                    "ж": "zh",
+                    "з": "z",
+                    "и": "i",
+                    "й": "y",
+                    "к": "k",
+                    "л": "l",
+                    "м": "m",
+                    "н": "n",
+                    "о": "o",
+                    "п": "p",
+                    "р": "r",
+                    "с": "s",
+                    "т": "t",
+                    "у": "u",
+                    "ф": "f",
+                    "х": "kh",
+                    "ц": "ts",
+                    "ч": "ch",
+                    "ш": "sh",
+                    "щ": "shch",
+                    "ь": "",
+                    "ы": "y",
+                    "ъ": "ie",
+                    "э": "e",
+                    "ю": "yu",
+                    "я": "ya",
+                    " ": " ",
+                    "-": "-"
+                };
+                var commonEngRusTranliterationRule = {
+
+                    "shch": "щ",
+                    "tsk": "тск",
+
+                    "yu": "ю",
+                    "ya": "я",
+                    "ju": "ю",
+
+                    "yy": "ый",
+                    "oy": "ой",
+                    "iy": "ий",
+                    "ey": "ей",
+
+                    "ts": "ц",
+                    "zh": "ж",
+                    "kh": "х",
+                    "ch": "ч",
+                    "sh": "ш",
+
+                    "ie": "ъ",
+
+                    "a": "а",
+                    "b": "б",
+                    "c": "к",
+                    "d": "д",
+                    "e": "е",
+                    "f": "ф",
+                    "g": "г",
+                    "h": "х",
+                    "i": "и",
+                    "j": "дж",
+                    "k": "к",
+                    "l": "л",
+                    "m": "м",
+                    "n": "н",
+                    "o": "о",
+                    "p": "п",
+                    "q": "кв",
+                    "r": "р",
+                    "s": "с",
+                    "t": "т",
+                    "u": "у",
+                    "v": "в",
+                    "w": "в",
+                    "x": "кс",
+                    "y": "ы",
+                    "z": "з",
+                    " ": " ",
+                    "-": "-",
+                    firstNames: {
+                        "alexey": "алексей",
+                        "alexander": "александр",
+                        "andrey": "андрей",
+                        "anatoly": "анатолий",
+                        "anton": "антон",
+                        "arseniy": "арсений",
+                        "artem": "артем",
+                        "alevtina": "алевтина",
+                        "alexandra": "александра",
+                        "anastasiya": "анастасия",
+                        "anna": "анна",
+                        "arina": "арина",
+                        "bahodur": "баходур",
+                        "boris": "борис",
+                        "viktor": "виктор",
+                        "vitaly": "виталий",
+                        "vadim": "вадим",
+                        "valery": "валерий",
+                        "vissarion": "виссарион",
+                        "vasily": "василий",
+                        "vselovod": "всеволод",
+                        "vladimir": "владимир",
+                        "vyacheslav": "вячеслав",
+                        "valentina": "валентина",
+                        "valeriya": "валерия",
+                        "vera": "вера",
+                        "veronika": "вероника",
+                        "victoriya": "виктория",
+                        "georgiy": "георгий",
+                        "grigory": "григорий",
+                        "galina": "галина",
+                        "daniil": "даниил",
+                        "denis": "денис",
+                        "dmitry": "дмитрий",
+                        "darya": "дарья",
+                        "diana": "диана",
+                        "egor": "егор",
+                        "evgeny": "евгений",
+                        "evgenia": "евгения",
+                        "ekaterina": "екатерина",
+                        "elena": "елена",
+                        "elizaveta": "елизавета",
+                        "ilya": "илья",
+                        "igor": "игорь",
+                        "ivan": "иван",
+                        "irina": "ирина",
+                        "kirill": "кирилл",
+                        "konstantin": "константин",
+                        "klim": "клим",
+                        "kira": "кира",
+                        "kseniya": "ксения",
+                        "lyubov": "любовь",
+                        "liudmila": "людмила",
+                        "liliya": "лилия",
+                        "maxim": "максим",
+                        "mikhail": "михаил",
+                        "margarita": "маргарита",
+                        "marina": "марина",
+                        "maria": "мария",
+                        "nikita": "никита",
+                        "nikolay": "николай",
+                        "natalia": "наталья",
+                        "nataliya": "наталия",
+                        "nina": "нина",
+                        "nadezhda": "надежда",
+                        "oksana": "оксана",
+                        "olga": "ольга",
+                        "oleg": "олег",
+                        "pavel": "павел",
+                        "polina": "полина",
+                        "peter": "питер",
+                        "prokhor": "прохор",
+                        "rodion": "родион",
+                        "roman": "роман",
+                        "ruslan": "руслан",
+                        "sergey": "сергей",
+                        "semen": "семен",
+                        "stanislav": "станислав",
+                        "stepan": "степан",
+                        "svetlana": "светлана",
+                        "tatiana": "татьяна",
+                        "julia": "юлия",
+                        "yuri": "юрий",
+                        "yakov": "яков",
+                        "iana": "яна"
+                    }
+                };
+
+                var taleoRusEngransliterationRule = {
+                    firstNames: {
+                        "алексей": "aleksei",
+                        "александр": "aleksandr",
+                        "андрей ": "andrei",
+                        "анатолий": "anatolii",
+                        "андрей": "andrei",
+                        "антон": "anton",
+                        "арсений": "arsenii",
+                        "артем": "artem",
+                        "алевтина": "alevtina",
+                        "александра": "aleksandra",
+                        "анастасия": "anastasiia",
+                        "анна": "anna",
+                        "арина": "arina",
+                        "баходур": "bakhodur",
+                        "борис": "boris",
+                        "виктор": "viktor",
+                        "виталий": "vitalii",
+                        "вадим": "vadim",
+                        "валерий": "valerii",
+                        "виссарион": "vissarion",
+                        "василий": "vasilii",
+                        "всеволод": "vsevolod",
+                        "владимир": "vladimir",
+                        "вячеслав": "viacheslav",
+                        "валентина": "valentina",
+                        "валерия": "valeriia",
+                        "вера": "vera",
+                        "вероника": "veronika",
+                        "виктория": "viktoriia",
+                        "георгий": "georgii",
+                        "григорий": "grigorii",
+                        "галина": "galina",
+                        "даниил": "daniil",
+                        "денис": "denis",
+                        "дмитрий": "dmitrii",
+                        "дарья": "daria",
+                        "диана": "diana",
+                        "егор": "egor",
+                        "евгений": "evgenii",
+                        "евгения": "evgeniia",
+                        "екатерина": "ekaterina",
+                        "елена": "elena",
+                        "елизавета": "elizaveta",
+                        "илья": "ilia",
+                        "игорь": "igor",
+                        "иван": "ivan",
+                        "ирина": "irina",
+                        "кирилл": "kirill",
+                        "константин": "konstsntin",
+                        "клим": "klim",
+                        "кира": "kira",
+                        "ксения": "kseniia",
+                        "любовь": "liubov",
+                        "людмила": "liudmila",
+                        "лилия": "liliia",
+                        "максим": "maksim",
+                        "михаил": "mikhail",
+                        "маргарита": "margarita",
+                        "марина": "marina",
+                        "мария": "mariia",
+                        "никита": "nikita",
+                        "николай": "nikolai",
+                        "наталья": "natalia",
+                        "наталия": "nataliia",
+                        "нина": "nina",
+                        "надежда": "nadezhda",
+                        "оксана": "oksana",
+                        "ольга": "olga",
+                        "олег": "oleg",
+                        "павел": "pavel",
+                        "полина": "polina",
+                        "питер": "peter",
+                        "прохор": "prokhor",
+                        "родион": "rodion",
+                        "роман": "roman",
+                        "руслан": "ruslan",
+                        "сергей": "sergei",
+                        "семен": "semen",
+                        "станислав": "stanislav",
+                        "степан": "stepan",
+                        "светлана": "svetlana",
+                        "татьяна": "tatiana",
+                        "юлия": "iuliia",
+                        "юрий": "iurii",
+                        "яков": "iakov",
+                        "яна": "iana"
+                    },
+
+                    "а": "a",
+                    "б": "b",
+                    "в": "v",
+                    "г": "g",
+                    "д": "d",
+                    "е": "e",
+                    "ё": "e",
+                    "ж": "zh",
+                    "з": "z",
+                    "и": "i",
+                    "й": "i",
+                    "к": "k",
+                    "л": "l",
+                    "м": "m",
+                    "н": "n",
+                    "о": "o",
+                    "п": "p",
+                    "р": "r",
+                    "с": "s",
+                    "т": "t",
+                    "у": "u",
+                    "ф": "f",
+                    "х": "kh",
+                    "ц": "ts",
+                    "ч": "ch",
+                    "ш": "sh",
+                    "щ": "shch",
+                    "ь": "",
+                    "ы": "y",
+                    "ъ": "ie",
+                    "э": "e",
+                    "ю": "iu",
+                    "я": "ia",
+                    " ": " ",
+                    "-": "-",
+                };
+                var taleoEngRusTransliterationRule = {
+                    firstNames: {
+                        "aleksei": "алексей",
+                        "aleksandr": "александр",
+                        "andrei": "андрей",
+                        "anatolii": "анатолий",
+                        "anton": "антон",
+                        "arsenii": "арсений",
+                        "artem": "артем",
+                        "alevtina": "алевтина",
+                        "aleksandra": "александра",
+                        "anastasiia": "анастасия",
+                        "anna": "анна",
+                        "arina": "арина",
+                        "bakhodur": "баходур",
+                        "boris": "борис",
+                        "viktor": "виктор",
+                        "vitalii": "виталий",
+                        "vadim": "вадим",
+                        "valerii": "валерий",
+                        "vissarion": "виссарион",
+                        "vasilii": "василий",
+                        "vsevolod": "всеволод",
+                        "vladimir": "владимир",
+                        "viacheslav": "вячеслав",
+                        "valentina": "валентина",
+                        "valeriia": "валерия",
+                        "vera": "вера",
+                        "veronika": "вероника",
+                        "viktoriia": "виктория",
+                        "georgii": "георгий",
+                        "grigorii": "григорий",
+                        "galina": "галина",
+                        "daniil": "даниил",
+                        "denis": "денис",
+                        "dmitrii": "дмитрий",
+                        "daria": "дарья",
+                        "diana": "диана",
+                        "egor": "егор",
+                        "evgenii": "евгений",
+                        "evgeniia": "евгения",
+                        "ekaterina": "екатерина",
+                        "elena": "елена",
+                        "elizaveta": "елизавета",
+                        "ilia": "илья",
+                        "igor": "игорь",
+                        "ivan": "иван",
+                        "irina": "ирина",
+                        "kirill": "кирилл",
+                        "konstsntin": "константин",
+                        "klim": "клим",
+                        "kira": "кира",
+                        "kseniia": "ксения",
+                        "liubov": "любовь",
+                        "liudmila": "людмила",
+                        "liliia": "лилия",
+                        "maksim": "максим",
+                        "mikhail": "михаил",
+                        "margarita": "маргарита",
+                        "marina": "марина",
+                        "mariia": "мария",
+                        "nikita": "никита",
+                        "nikolai": "николай",
+                        "natalia": "наталья",
+                        "nataliia": "наталия",
+                        "nina": "нина",
+                        "nadezhda": "надежда",
+                        "oksana": "оксана",
+                        "olga": "ольга",
+                        "oleg": "олег",
+                        "pavel": "павел",
+                        "polina": "полина",
+                        "peter": "питер",
+                        "prokhor": "прохор",
+                        "rodion": "родион",
+                        "roman": "роман",
+                        "ruslan": "руслан",
+                        "sergei": "сергей",
+                        "semen": "семен",
+                        "stanislav": "станислав",
+                        "stepan": "степан",
+                        "svetlana": "светлана",
+                        "tatiana": "татьяна",
+                        "iuliia": "юлия",
+                        "iurii": "юрий",
+                        "iakov": "яков",
+                        "iana": "яна"
+                    },
+                    "shch": "щ",
+                    "tsk": "тск",
+
+                    "iu": "ю",
+                    "ia": "я",
+
+                    "ii": "ий",
+                    "oi": "ой",
+                    "yi": "ый",
+                    "ei": "ей",
+
+                    "ts": "ц",
+                    "zh": "ж",
+                    "kh": "х",
+                    "ch": "ч",
+                    "sh": "ш",
+
+                    "ie": "ъ",
+
+                    "a": "а",
+                    "b": "б",
+                    "c": "к",
+                    "d": "д",
+                    "e": "е",
+                    "f": "ф",
+                    "g": "г",
+                    "h": "х",
+                    "i": "и",
+                    "j": "дж",
+                    "k": "к",
+                    "l": "л",
+                    "m": "м",
+                    "n": "н",
+                    "o": "о",
+                    "p": "п",
+                    "q": "кв",
+                    "r": "р",
+                    "s": "с",
+                    "t": "т",
+                    "u": "у",
+                    "v": "в",
+                    "w": "в",
+                    "x": "кс",
+                    "y": "ы",
+                    "z": "з",
+                    " ": " ",
+                    "-": "-"
+                };
+
+
+                var transliterationRules = {
+                    "UPSA": {
+                        "RUSENG": commonRusEngTransliterationRule,
+                        "ENGRUS": commonEngRusTranliterationRule
+                    },
+                    "TALEO": {
+                        "RUSENG": taleoRusEngransliterationRule,
+                        "ENGRUS": taleoEngRusTransliterationRule
+                    }
+                };
+
+                return {
+                    transliterateName: function transliterateName(text, targetRule, targetMode) {
+                        console.log("transliterate: Transliterating " + text + " with " + targetRule + ":" + targetMode);
+                        var words = text.toLowerCase().split(' ');
+                        var result = '';
+                        var replacementResult = {};
+                        var warnings = [];
+                        var missingChars = '';
+                        var rule = transliterationRules[targetRule][targetMode];
+
+                        for (var i = 0; i < words.length; i++) {
+                            if (words[i] in rule.firstNames) {
+                                console.log("transliterate: " + words[i] + " name found in vocabulary. Replace name " + words[i] + " to " + rule.firstNames[words[i]]);
+                                words[i] = rule.firstNames[words[i]];
+                            } else {
+                                console.log("transliterate: Trying replace word " + words[i]);
+                                replacementResult = this.replaceWord(words[i], rule, warnings);
+                                words[i] = replacementResult.result;
+                                missingChars += replacementResult.missingChars;
+                            }
+                        }
+
+                        result = this.capitalizeFirstLetters(words.join(' '));
+                        if (missingChars.length !== 0) {
+                            warnings.push('Unrecognized characters: ' + missingChars);
+                            console.log('transliterate: Unrecognized characters: ' + missingChars);
+                        } else {
+                            console.log("transliterate: Successfully converted from '" + text + "' to '" + result + "'");
+                        }
+
+
+                        return {
+                            result: result,
+                            warnings: warnings
+                        };
+                    },
+
+                    capitalizeFirstLetters: function capitalizeFirstLetters(text) {
+                        return text.toLowerCase().split(' ').map(function (s) {
+                            return s.charAt(0).toUpperCase() + s.substring(1);
+                        }).join(' ');
+                    },
+
+                    replaceWord: function replaceLetters(text, rule, warnings) {
+                        var result = '';
+                        var character = '';
+                        var inputChar = '';
+                        var missingChars = '';
+                        var warningMessage = '';
+
+                        for (var i = 0; i < text.length; i++) {
+                            inputChar = text[i].toLowerCase();
+                            if (rule[inputChar] == undefined) {
+                                character = inputChar;
+                                missingChars += inputChar;
+                                warningMessage = "Failed to convert character: '" + missingChars + "'";
+                            }
+                        }
+
+
+                        if (warningMessage.length == 0) {
+                            result = text;
+                            for (var currentKey in rule) {
+                                if (result.match(new RegExp(currentKey, 'g'))) {
+                                    console.log("replaceWord: " + currentKey + " => " + rule[currentKey])
+                                }
+                                result = result.replace(new RegExp(currentKey, 'g'), rule[currentKey]);
+                            }
+                        } else {
+                            console.log("replaceWord: " + warningMessage + " in " + text);
+                        }
+
+                        return {
+                            result: result,
+                            missingChars: missingChars
+                        };
+                    }
+                };
+            }()
+
+        },
+        methods: {
+
+            processSingleStringMode: function () {
+                this.resetResultForms();
+                if (this.singleInput.length > 0) {
+                    var resultUpsa = this.model.transliterateName(this.singleInput, "UPSA", this.mode);
+                    var resultTaleo = this.model.transliterateName(this.singleInput, "TALEO", this.mode);
+
+                    if (resultTaleo.warnings.length === 0) {
+                        this.singleResult.upsa = resultUpsa.result;
+                        this.singleResult.taleo = resultTaleo.result;
+                    } else {
+                        this.warnings.push(resultUpsa.warnings);
+                    }
+                }
+            },
+
+            processMultiStringMode: function () {
+                this.resetResultForms();
+                var stringArray = this.multiInput.split('\n');
+
+                for (var key in stringArray) {
+                    var stringLine = stringArray[key];
+
+                    var resultUpsa = this.model.transliterateName(stringLine, "UPSA", this.mode);
+                    var resultTaleo = this.model.transliterateName(stringLine, "TALEO", this.mode);
+
+                    if (resultTaleo.warnings.length === 0) {
+                        var upsaResultEntity = resultUpsa.result.split(" ");
+                        var taleoResultEntity = resultTaleo.result.split(" ");
+
+                        this.multiResult.upsa.push({
+                            full: upsaResultEntity.join(" "),
+                            first: upsaResultEntity[0],
+                            last: upsaResultEntity.slice(1).join(" ")
+                        });
+                        this.multiResult.taleo.push({
+                            full: taleoResultEntity.join(" "),
+                            first: taleoResultEntity[0],
+                            last: taleoResultEntity.slice(1).join(" ")
+                        });
+                    } else if (stringLine !== '') {
+                        this.warnings.push(resultTaleo.warnings);
+                    }
+                }
+
+            },
+
+            changeLang: function (lang) {
+                this.mode = lang;
+                this.resetResultForms();
+                if (this.multiline)
+                    this.processMultiStringMode(); else this.processSingleStringMode();
+
+            },
+
+            resetResultForms: function () {
+                console.log("");
+                this.warnings = [];
+                this.singleResult = {};
+                this.multiResult = {
+                    upsa: [],
+                    taleo: []
+                };
+            },
+
+            fullReset: function () {
+                this.resetResultForms();
+                this.singleInput = '';
+                this.multiInput = '';
+            },
+
+            copySingleNameToClipboard: function (fieldId) {
+                var fieldElement = document.getElementsByClassName(fieldId)[0];
+                fieldElement.select();
+                document.execCommand("copy");
+            },
+
+            copyTableToClipboard: function (table, field) {
+                var stringArray = [];
+                var tableData = this.multiResult[table];
+                var copyArea = document.getElementsByClassName("hiddenCopyArea")[0];
+
+
+                for (var key in tableData) {
+                    var data = tableData[key];
+
+                    var first = data.first || "";
+                    var last = data.last || "";
+                    var full = first + " " + last;
+
+                    switch (field) {
+                        case "full":
+                            copyArea.value = copyArea.value + full + '\n';
+                            break;
+
+                        case "first":
+                            copyArea.value = copyArea.value + first + '\n';
+                            break;
+                        case "last":
+                            copyArea.value = copyArea.value + last + '\n';
+                            break;
+                    }
+                }
+
+                copyArea.select();
+                document.execCommand("copy");
+                copyArea.value = "";
+            }
+        }
+    });
+
+</script>
+
+</body>
+</html>
