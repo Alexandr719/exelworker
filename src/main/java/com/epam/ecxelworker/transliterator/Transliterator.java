@@ -38,6 +38,7 @@ public class Transliterator {
             }
         }
         if (!findName) {
+
             char[] chars = word.toCharArray();
             outWord = transliterateChars(chars);
         }
@@ -45,12 +46,16 @@ public class Transliterator {
     }
     private String transliterateChars(char[] chars) {
         StringBuilder outWord = new StringBuilder("");
+        boolean findLetter = false;
         for (char aChar : chars) {
             for (String key : lettersMap.keySet()) {
                 if (key.charAt(0) == aChar) {
                     outWord.append(lettersMap.get(key));
+                    findLetter = true;
                 }
-
+            }
+            if(!findLetter){
+                outWord.append(aChar);
             }
         }
         return outWord.toString();
