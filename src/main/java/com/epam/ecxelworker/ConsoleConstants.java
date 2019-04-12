@@ -23,4 +23,7 @@ public class ConsoleConstants {
 
 
     public static final int ZERO = 0;
+
+    public static final String FILE_EXTENSION = ".xlsx";
+
 }

@@ -1,5 +1,6 @@
 package com.epam.ecxelworker.consolidation;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -9,44 +10,25 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
+@Log4j2
 @Service
 public class ConsolidationWorker {
 
-    private final static int EMAIL_CELL_NUMBER = 1; //номер ячейки с Email
-    private final static int HEADER_ROW = 0; //номер ячейки с Email
-    private final static int PRISHEL_ROW = 2; //номер ячейки с Email
 
-    private XSSFWorkbook mergeHeaderIntoTable(XSSFWorkbook workbook, String
-            header) {
-        XSSFSheet myExcelSheet = workbook.getSheetAt(0);
-        XSSFRow row = myExcelSheet.getRow(0);
-        Cell name = row.createCell(row.getLastCellNum());
-        name.setCellValue(header);
-        return workbook;
-    }
-
-    public void mergeContentIntoTable(XSSFSheet myExcelSheet,
-                                              XSSFSheet myExcelSheet2
+     public void mergeContentIntoTable(XSSFSheet myExcelSheet,
+                                              XSSFSheet myExcelSheet2, int
+                                               compareCellNumberOne, int
+                                               compareCellNumberTwo, int
+                                       additionCellNumber
                                              ) {
 
 
-        XSSFRow row = myExcelSheet.getRow(HEADER_ROW);
-        Cell cell = row.getCell(EMAIL_CELL_NUMBER);
-        System.out.println("1 таблица " + cell.getStringCellValue());
-
-
-        XSSFRow row2 = myExcelSheet2.getRow(HEADER_ROW);
-        Cell cell2 = row2.getCell(PRISHEL_ROW);
-        System.out.println("2 таблица " + cell2.getStringCellValue());
-
         Map<String, Integer> firstTableMap = createRowIndexEmailMap
-                (myExcelSheet);
+                (myExcelSheet, compareCellNumberOne);
         Map<String, Integer> secondTableMap =
-                createRowIndexEmailMap(myExcelSheet2);
+                createRowIndexEmailMap(myExcelSheet2, compareCellNumberTwo);
 
-
-        XSSFRow outRow = myExcelSheet.getRow(2);
+        XSSFRow outRow = myExcelSheet.getRow(additionCellNumber);
         int lastNumber = outRow.getLastCellNum();
 
         for (String key : firstTableMap.keySet()) {
@@ -57,7 +39,7 @@ public class ConsolidationWorker {
 
                     mergeNewColumn(myExcelSheet, myExcelSheet2,
                             currentRowNumber, lastNumber,
-                            tableTwoCurrentRowNumber, PRISHEL_ROW);
+                            tableTwoCurrentRowNumber, additionCellNumber);
                 }
             }
         }
@@ -65,15 +47,16 @@ public class ConsolidationWorker {
     }
 
 
-    private Map<String, Integer> createRowIndexEmailMap(XSSFSheet sheet) {
+    private Map<String, Integer> createRowIndexEmailMap(XSSFSheet sheet, int
+            compareCellNumber) {
         Map<String, Integer> tableMap = new HashMap<>();
 
         Iterator secondRowIter = sheet.rowIterator();
         while (secondRowIter.hasNext()) {
             XSSFRow currentRow = (XSSFRow) secondRowIter.next();
-            tableMap.put(currentRow.getCell(EMAIL_CELL_NUMBER)
+            tableMap.put(currentRow.getCell(compareCellNumber)
                     .getStringCellValue(), currentRow.getRowNum());
-            if (currentRow.getCell(EMAIL_CELL_NUMBER).getStringCellValue()
+            if (currentRow.getCell(compareCellNumber).getStringCellValue()
                     .equals("")) {
                 break;
             }

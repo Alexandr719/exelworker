@@ -10,7 +10,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLOutput;
 import java.util.Iterator;
 import java.util.Scanner;
 
@@ -27,7 +26,6 @@ public class Application {
 
     void runConsoleApplication() {
         showEvents();
-
         Scanner in = new Scanner(System.in);
         System.out.print("Введите номер:");
         int num = in.nextInt();
@@ -49,30 +47,6 @@ public class Application {
                 break;
         }
 
-
-        String filename =
-                "D:/Filatov/geekenglish/ecxelworker/src/main" +
-                        "/resources/tab1.xlsx";
-
-        String filename2 =
-                "D:/Filatov/geekenglish/ecxelworker/src/main" +
-                        "/resources/tab2.xlsx";
-
-
-        XSSFWorkbook xssfWorkbook = fileWorker.readExcelBook(filename2);
-        // XSSFWorkbook xssfWorkbook2 = fileWorker.readExcelBook(filename);
-
-
-        XSSFSheet myExcelSheet = xssfWorkbook.getSheetAt(0);
-
-
-        transliterator.transliterateExcelCollumn(myExcelSheet, 2);
-        fileWorker.saveExcelBook(xssfWorkbook, "name2.xlsx");
-
-
-//        fileWorker.saveExcelBook(consolidationWorker
-//                        .mergeContentIntoTable(xssfWorkbook, xssfWorkbook2),
-//                "name2.xlsx");
     }
 
 
@@ -122,31 +96,51 @@ public class Application {
 
 
         consolidationWorker.mergeContentIntoTable
-                (myExcelSheet, myExcelSheet2);
+                (myExcelSheet, myExcelSheet2, mainMergingNumber,
+                        mergingNumber , additionNumber);
         //Введите имя, под каким сохранть файл
-        fileWorker.saveExcelBook(xssfWorkbook, "merge.xlsx");
-
+        saveFileByInputName(xssfWorkbook);
 
     }
 
     private void startTransliteration() {
+        //Введите полный путь до 1 файла
+        String mainFile =
+                "D:/Filatov/geekenglish/ecxelworker/src/main" +
+                        "/resources/tab2.xlsx";
 
+        //Введите номер листа начиная с 0
+        XSSFWorkbook xssfWorkbook = fileWorker.readExcelBook(mainFile);
+        XSSFSheet myExcelSheet = xssfWorkbook.getSheetAt(0);
+
+        //Выберите номер столбца, который хотите транслитерировать
+        showTableHeader(myExcelSheet);
+        int collumnNumber = 2;
+
+        transliterator.transliterateExcelCollumn(myExcelSheet, collumnNumber);
+        saveFileByInputName(xssfWorkbook);
 
     }
+
+    private void saveFileByInputName(XSSFWorkbook workbook){
+        //Введите имя, под каким сохранть файл
+        String fileName = "merge";
+        fileName += ConsoleConstants.FILE_EXTENSION;
+        fileWorker.saveExcelBook(workbook, fileName);
+    }
+
 
     private void showTableHeader(XSSFSheet sheet) {
-
-        System.out.println("##########################");
-        XSSFRow row = sheet.getRow(ConsoleConstants.ZERO);
-        Iterator cellIter = row.cellIterator();
-        int counter = 0;
-        while (cellIter.hasNext()) {
-            XSSFCell cell = (XSSFCell) cellIter.next();
-            System.out.println(counter + "-" + cell.getStringCellValue());
-            counter++;
-        }
-        System.out.println("##########################");
-
+    System.out.println("##########################");
+    XSSFRow row = sheet.getRow(ConsoleConstants.ZERO);
+    Iterator cellIter = row.cellIterator();
+    int counter = 0;
+    while (cellIter.hasNext()) {
+        XSSFCell cell = (XSSFCell) cellIter.next();
+        System.out.println(counter + "-" + cell.getStringCellValue());
+        counter++;
     }
+    System.out.println("##########################");
+}
 
 }
