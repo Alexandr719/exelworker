@@ -23,7 +23,7 @@ public class ConfigProperties {
     public Map<String, String> letterMap(){
         return getMapFromProperties(propertiesLoader.getLettersProperties());
     }
-
+//Todo register
     private Map<String, String> getMapFromProperties(Properties properties) {
         Map<String, String> map = new HashMap<>();
         for (String name : properties.stringPropertyNames())

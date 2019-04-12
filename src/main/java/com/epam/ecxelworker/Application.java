@@ -3,6 +3,7 @@ package com.epam.ecxelworker;
 import com.epam.ecxelworker.consolidation.ConsolidationWorker;
 import com.epam.ecxelworker.file.ExcelFileWorker;
 import com.epam.ecxelworker.transliterator.Transliterator;
+import lombok.extern.log4j.Log4j2;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -12,14 +13,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
 import java.util.Scanner;
-
+@Log4j2
 @Service
 public class Application {
+
     @Autowired
     ExcelFileWorker fileWorker;
     @Autowired
     ConsolidationWorker consolidationWorker;
-
     @Autowired
     Transliterator transliterator;
 
@@ -62,6 +63,7 @@ public class Application {
     }
 
     private void startMerge() {
+        log.info("Start merge");
 
         //Введите полный путь до 1 файла
         String mainFile =
@@ -81,6 +83,8 @@ public class Application {
         XSSFWorkbook xssfWorkbook2 = fileWorker.readExcelBook(mergeFile);
         XSSFSheet myExcelSheet2 = xssfWorkbook2.getSheetAt(0);
 
+        log.info("All files prepared  for merge");
+
         //Выберите номер столбца, который хотите добавить в таблицу
         showTableHeader(myExcelSheet2);
         System.out.println("Выберите номер столбца, который хотите добавить в таблицу");
@@ -98,13 +102,15 @@ public class Application {
         consolidationWorker.mergeContentIntoTable
                 (myExcelSheet, myExcelSheet2, mainMergingNumber,
                         mergingNumber , additionNumber);
-        //Введите имя, под каким сохранть файл
+
+        log.info("Files  merged");
         saveFileByInputName(xssfWorkbook);
 
     }
 
     private void startTransliteration() {
         //Введите полный путь до 1 файла
+        log.info("Start transliteration");
         String mainFile =
                 "D:/Filatov/geekenglish/ecxelworker/src/main" +
                         "/resources/tab2.xlsx";
@@ -112,12 +118,13 @@ public class Application {
         //Введите номер листа начиная с 0
         XSSFWorkbook xssfWorkbook = fileWorker.readExcelBook(mainFile);
         XSSFSheet myExcelSheet = xssfWorkbook.getSheetAt(0);
-
+        log.info("File prepared  for transliteration");
         //Выберите номер столбца, который хотите транслитерировать
         showTableHeader(myExcelSheet);
-        int collumnNumber = 2;
+        int columnNumber = 2;
 
-        transliterator.transliterateExcelCollumn(myExcelSheet, collumnNumber);
+        transliterator.transliterateExcelColumn(myExcelSheet, columnNumber);
+        log.info("File transliterated");
         saveFileByInputName(xssfWorkbook);
 
     }
@@ -127,8 +134,8 @@ public class Application {
         String fileName = "merge";
         fileName += ConsoleConstants.FILE_EXTENSION;
         fileWorker.saveExcelBook(workbook, fileName);
+        log.info("File was saving with name "+ fileName);
     }
-
 
     private void showTableHeader(XSSFSheet sheet) {
     System.out.println("##########################");

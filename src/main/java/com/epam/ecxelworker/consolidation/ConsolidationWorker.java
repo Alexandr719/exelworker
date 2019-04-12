@@ -4,7 +4,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -23,10 +22,10 @@ public class ConsolidationWorker {
                                              ) {
 
 
-        Map<String, Integer> firstTableMap = createRowIndexEmailMap
+        Map<String, Integer> firstTableMap = createMap
                 (myExcelSheet, compareCellNumberOne);
         Map<String, Integer> secondTableMap =
-                createRowIndexEmailMap(myExcelSheet2, compareCellNumberTwo);
+                createMap(myExcelSheet2, compareCellNumberTwo);
 
         XSSFRow outRow = myExcelSheet.getRow(additionCellNumber);
         int lastNumber = outRow.getLastCellNum();
@@ -36,7 +35,6 @@ public class ConsolidationWorker {
                 if (key.equalsIgnoreCase(key2)) {
                     int currentRowNumber = firstTableMap.get(key);
                     int tableTwoCurrentRowNumber = secondTableMap.get(key2);
-
                     mergeNewColumn(myExcelSheet, myExcelSheet2,
                             currentRowNumber, lastNumber,
                             tableTwoCurrentRowNumber, additionCellNumber);
@@ -47,7 +45,7 @@ public class ConsolidationWorker {
     }
 
 
-    private Map<String, Integer> createRowIndexEmailMap(XSSFSheet sheet, int
+    private Map<String, Integer> createMap(XSSFSheet sheet, int
             compareCellNumber) {
         Map<String, Integer> tableMap = new HashMap<>();
 

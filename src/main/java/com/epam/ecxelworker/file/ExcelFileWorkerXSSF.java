@@ -34,7 +34,5 @@ public class ExcelFileWorkerXSSF implements ExcelFileWorker {
             System.out.println("Не удалось сохранить файл");
             log.error("Error with saving book", e);
         }
-
-
     }
 }
