@@ -9,23 +9,43 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 @Log4j2
 @Service
 public class ConsolidationWorker {
 
 
-     public void mergeContentIntoTable(XSSFSheet myExcelSheet,
-                                              XSSFSheet myExcelSheet2, int
-                                               compareCellNumberOne, int
-                                               compareCellNumberTwo, int
-                                       additionCellNumber
-                                             ) {
+    public void mergeContentIntoTable(XSSFSheet myExcelSheet,
+                                      XSSFSheet myExcelSheet2, int
+                                              compareCellNumberOne, int
+                                              compareCellNumberTwo, int
+                                              additionCellNumber
+                                     ) {
 
 
         Map<String, Integer> firstTableMap = createMap
                 (myExcelSheet, compareCellNumberOne);
         Map<String, Integer> secondTableMap =
                 createMap(myExcelSheet2, compareCellNumberTwo);
+
+        System.out.println("Размер второй" + secondTableMap.size());
+        System.out.println("Размер первой" + firstTableMap.size());
+        int n = 0;
+        for (String key : secondTableMap.keySet()) {
+            boolean condition = false;
+
+            for (String key2 : firstTableMap.keySet()) {
+                if (key.equalsIgnoreCase(key2)) {
+                    condition = true;
+                    System.out.println(n++);
+                }
+            }
+            if (!condition) {
+                System.out.println("Нет совпадений : " + key);
+            }
+
+        }
+
 
         XSSFRow outRow = myExcelSheet.getRow(additionCellNumber);
         int lastNumber = outRow.getLastCellNum();
@@ -66,7 +86,8 @@ public class ConsolidationWorker {
     }
 
     private void mergeNewColumn(XSSFSheet editExcelSheet, XSSFSheet
-            resourceExcelSheet, int editExcelRowNumber, int editLastColumnNumber,
+            resourceExcelSheet, int editExcelRowNumber,
+                                int editLastColumnNumber,
                                 int resourceRowNumber, int resourceCellNumber) {
         XSSFRow editRow = editExcelSheet.getRow(editExcelRowNumber);
         Cell editCell = editRow.createCell(editLastColumnNumber);
