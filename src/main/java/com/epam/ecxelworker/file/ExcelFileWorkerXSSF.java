@@ -19,6 +19,7 @@ public class ExcelFileWorkerXSSF implements ExcelFileWorker {
             excelBook = new XSSFWorkbook(new FileInputStream
                     (filePath));
         } catch (IOException e) {
+            System.out.println("Неверный путь до файла");
             log.error("Error with reading book", e);
         }
         return excelBook;
@@ -30,6 +31,7 @@ public class ExcelFileWorkerXSSF implements ExcelFileWorker {
             workbook.write(fileOut);
             fileOut.close();
         } catch (IOException e) {
+            System.out.println("Не удалось сохранить файл");
             log.error("Error with saving book", e);
         }
 

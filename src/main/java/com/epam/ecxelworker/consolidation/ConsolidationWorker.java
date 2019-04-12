@@ -26,12 +26,10 @@ public class ConsolidationWorker {
         return workbook;
     }
 
-    public XSSFWorkbook mergeContentIntoTable(XSSFWorkbook workbook,
-                                              XSSFWorkbook workbook2
-
+    public void mergeContentIntoTable(XSSFSheet myExcelSheet,
+                                              XSSFSheet myExcelSheet2
                                              ) {
-        XSSFSheet myExcelSheet = workbook.getSheetAt(0);
-        XSSFSheet myExcelSheet2 = workbook2.getSheetAt(0);
+
 
         XSSFRow row = myExcelSheet.getRow(HEADER_ROW);
         Cell cell = row.getCell(EMAIL_CELL_NUMBER);
@@ -63,7 +61,7 @@ public class ConsolidationWorker {
                 }
             }
         }
-        return workbook;
+
     }
 
 

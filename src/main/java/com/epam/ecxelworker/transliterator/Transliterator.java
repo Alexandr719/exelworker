@@ -1,5 +1,9 @@
 package com.epam.ecxelworker.transliterator;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -18,14 +22,33 @@ public class Transliterator {
     @Qualifier("lettersProperty")
     private Map<String, String> lettersMap;
 
+
+
+
+
+    public void transliterateExcelCollumn(XSSFSheet sheet, int collumnNumber){
+        for (int i = 1; i < sheet.getLastRowNum()+1 ; i++) {
+            XSSFRow row = sheet.getRow(i);
+            Cell cell = row.getCell(collumnNumber);
+            if (cell.getCellType().equals(CellType.STRING)) {
+                cell.setCellValue(transliterateField(cell.getStringCellValue()));
+            }
+        }
+    }
+
+
     public String transliterateField(String field) {
         StringBuilder outWord = new StringBuilder("");
-        String[] words = field.split("\\s");
-        for (String subStr : words) {
-            outWord.append(transliterateWord(subStr)).append(" ");
+        if (!field.equals("")) {
+            field = field.trim();
+            String[] words = field.split("\\s");
+            for (String subStr : words) {
+                outWord.append(transliterateWord(subStr)).append(" ");
+            }
         }
         return outWord.toString();
     }
+
     private String transliterateWord(String word) {
         word = word.toLowerCase();
         String outWord = null;
@@ -44,6 +67,7 @@ public class Transliterator {
         }
         return outWord.substring(0, 1).toUpperCase() + outWord.substring(1);
     }
+
     private String transliterateChars(char[] chars) {
         StringBuilder outWord = new StringBuilder("");
         boolean findLetter = false;
@@ -54,7 +78,7 @@ public class Transliterator {
                     findLetter = true;
                 }
             }
-            if(!findLetter){
+            if (!findLetter) {
                 outWord.append(aChar);
             }
         }
