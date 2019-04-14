@@ -32,14 +32,13 @@ public class ConsolidationWorker {
 
         System.out.println("Размер второй" + secondTableMap.size());
         System.out.println("Размер первой" + firstTableMap.size());
-        int n = 0;
+
         for (String key : secondTableMap.keySet()) {
             boolean condition = false;
-
             for (String key2 : firstTableMap.keySet()) {
                 if (key.equalsIgnoreCase(key2)) {
                     condition = true;
-                    System.out.println(n++);
+
                 }
             }
             if (!condition) {
@@ -47,7 +46,6 @@ public class ConsolidationWorker {
             }
 
         }
-
 
         XSSFRow outRow = myExcelSheet.getRow(additionCellNumber);
         int lastNumber = outRow.getLastCellNum();
@@ -70,7 +68,6 @@ public class ConsolidationWorker {
     private Map<String, Integer> createMap(XSSFSheet sheet, int
             compareCellNumber) {
         Map<String, Integer> tableMap = new HashMap<>();
-
         Iterator rowIterator = sheet.rowIterator();
         while (rowIterator.hasNext()) {
             XSSFRow currentRow = (XSSFRow) rowIterator.next();
