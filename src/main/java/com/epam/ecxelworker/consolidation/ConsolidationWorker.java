@@ -2,6 +2,8 @@ package com.epam.ecxelworker.consolidation;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class ConsolidationWorker {
                                               compareCellNumberOne, int
                                               compareCellNumberTwo, int
                                               additionCellNumber
-                                     ) {
+    ) {
 
 
         Map<String, Integer> firstTableMap = createMap
@@ -69,18 +71,15 @@ public class ConsolidationWorker {
             compareCellNumber) {
         Map<String, Integer> tableMap = new HashMap<>();
 
-        Iterator secondRowIter = sheet.rowIterator();
-        while (secondRowIter.hasNext()) {
-            XSSFRow currentRow = (XSSFRow) secondRowIter.next();
-            tableMap.put(currentRow.getCell(compareCellNumber)
-                    .getStringCellValue(), currentRow.getRowNum());
-            if (currentRow.getCell(compareCellNumber).getStringCellValue()
-                    .equals("")) {
-                break;
+        Iterator rowIterator = sheet.rowIterator();
+        while (rowIterator.hasNext()) {
+            XSSFRow currentRow = (XSSFRow) rowIterator.next();
+            XSSFCell currentCell = currentRow.getCell(compareCellNumber);
+            if (currentCell != null && !currentCell.getStringCellValue()
+                    .equals("") ) {
+                tableMap.put(currentCell.getStringCellValue().toLowerCase().trim(), currentRow.getRowNum());
             }
         }
-
-
         return tableMap;
 
     }

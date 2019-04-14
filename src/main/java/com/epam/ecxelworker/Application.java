@@ -67,7 +67,7 @@ public class Application {
 
         //Введите полный путь до 1 файла
         String mainFile =
-                "D:/Filatov/geekenglish/ecxelworker/src/main" +
+                "F:/excelWorker/exelworker/src/main" +
                         "/resources/tab2.xlsx";
 
         //Введите номер листа начиная с 0
@@ -76,8 +76,9 @@ public class Application {
 
         //Введите полный путь до 2 файла
         String mergeFile =
-                "D:/Filatov/geekenglish/ecxelworker/src/main" +
+                "F:/excelWorker/exelworker/src/main" +
                         "/resources/tab1.xlsx";
+
 
         //Введите номер листа второго файла начиная с 0
         XSSFWorkbook xssfWorkbook2 = fileWorker.readExcelBook(mergeFile);
