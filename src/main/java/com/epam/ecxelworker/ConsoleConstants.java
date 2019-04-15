@@ -42,5 +42,6 @@ public class ConsoleConstants {
             "D:/Filatov/geekenglish/ecxelworker/src/main/resources" +
                     "/tab1.xlsx";
 
-
+public static final String TRANSLITERATION_COLUMN_NUMBER = "Выберите номер " +
+        "столбца, который хотите транслитерировать:";
 }

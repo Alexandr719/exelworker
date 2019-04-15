@@ -60,4 +60,16 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>no-test-profile</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>

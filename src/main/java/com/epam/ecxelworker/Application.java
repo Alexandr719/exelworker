@@ -125,11 +125,16 @@ public class Application {
     private void startTransliteration() {
         //Введите полный путь до 1 файла
         log.info("Start transliteration");
-        String mainFile =
-                "D:/Filatov/geekenglish/ecxelworker/src/main" +
-                        "/resources/tab2.xlsx";
+        Scanner in = new Scanner(System.in);
 
-        //Введите номер листа начиная с 0
+        //Read first file
+        System.out.print(ConsoleConstants.ENTET_FULL_PATH);
+        String mainFile = in.nextLine();
+//        String mainFile =
+//                "D:/Filatov/geekenglish/ecxelworker/src/main" +
+//                        "/resources/tab2.xlsx";
+
+
         XSSFWorkbook xssfWorkbook = null;
         try {
             xssfWorkbook = fileWorker.readExcelBook(mainFile);
@@ -138,9 +143,12 @@ public class Application {
         }
         XSSFSheet myExcelSheet = xssfWorkbook.getSheetAt(0);
         log.info("File prepared  for transliteration");
+
         //Выберите номер столбца, который хотите транслитерировать
         showTableHeader(myExcelSheet);
-        int columnNumber = 2;
+        System.out.print(ConsoleConstants.TRANSLITERATION_COLUMN_NUMBER);
+        int columnNumber = in.nextInt();
+        //int columnNumber = 2;
 
         transliterator.transliterateExcelColumn(myExcelSheet, columnNumber);
         log.info("File transliterated");

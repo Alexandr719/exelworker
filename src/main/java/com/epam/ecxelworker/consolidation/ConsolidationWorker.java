@@ -27,8 +27,8 @@ public class ConsolidationWorker {
         Map<String, Integer> secondTableMap =
                 createMap(myExcelSheet2, compareCellNumberTwo);
 
-        System.out.println("Размер первой таблицы " + firstTableMap.size());
-        System.out.println("Размер второй таблицы " + secondTableMap.size());
+        System.out.println("Размер первого столбца " + firstTableMap.size());
+        System.out.println("Размер второго столбца " + secondTableMap.size());
 
         foundNotEqualsMap(firstTableMap, secondTableMap, " первой таблицы ");
         foundNotEqualsMap(secondTableMap, firstTableMap, " второй  таблицы ");
@@ -98,8 +98,5 @@ public class ConsolidationWorker {
             }
 
         }
-
-
     }
-
 }
