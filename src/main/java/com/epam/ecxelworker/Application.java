@@ -1,6 +1,7 @@
 package com.epam.ecxelworker;
 
 import com.epam.ecxelworker.consolidation.ConsolidationWorker;
+import com.epam.ecxelworker.exeptions.ConsoleException;
 import com.epam.ecxelworker.file.ExcelFileWorker;
 import com.epam.ecxelworker.transliterator.Transliterator;
 import lombok.extern.log4j.Log4j2;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
 import java.util.Scanner;
+
 @Log4j2
 @Service
 public class Application {
@@ -64,45 +66,56 @@ public class Application {
 
     private void startMerge() {
         log.info("Start merge");
+        Scanner in = new Scanner(System.in);
 
-        //Введите полный путь до 1 файла
-        String mainFile =
-                "F:/excelWorker/exelworker/src/main" +
-                        "/resources/tab2.xlsx";
+        //Read first file
+        System.out.print(ConsoleConstants.ENTET_FULL_PATH);
+        String mainFile = in.nextLine();
+       // String mainFile = ConsoleConstants.FILE_1_PATH_EXTENSION;
+        XSSFWorkbook xssfWorkbook = null;
+        XSSFSheet myExcelSheet = null;
+        try {
+            xssfWorkbook = fileWorker.readExcelBook(mainFile);
+            myExcelSheet = xssfWorkbook.getSheetAt(0);
+        } catch (ConsoleException e) {
+            System.out.println(e.getMessage());
+        }
 
-        //Введите номер листа начиная с 0
-        XSSFWorkbook xssfWorkbook = fileWorker.readExcelBook(mainFile);
-        XSSFSheet myExcelSheet = xssfWorkbook.getSheetAt(0);
-
-        //Введите полный путь до 2 файла
-        String mergeFile =
-                "F:/excelWorker/exelworker/src/main" +
-                        "/resources/tab1.xlsx";
-
-
-        //Введите номер листа второго файла начиная с 0
-        XSSFWorkbook xssfWorkbook2 = fileWorker.readExcelBook(mergeFile);
+        //Read second file
+        System.out.print(ConsoleConstants.ENTET_FULL_PATH);
+        String mergeFile = in.nextLine();
+//        String mergeFile =
+//                ConsoleConstants.FILE_2_PATH_EXTENSION;
+        XSSFWorkbook xssfWorkbook2 = null;
+        try {
+            xssfWorkbook2 = fileWorker.readExcelBook(mergeFile);
+        } catch (ConsoleException e) {
+            System.out.println(e.getMessage());
+        }
         XSSFSheet myExcelSheet2 = xssfWorkbook2.getSheetAt(0);
+
 
         log.info("All files prepared  for merge");
 
-        //Выберите номер столбца, который хотите добавить в таблицу
+
+        //Conditions
         showTableHeader(myExcelSheet2);
-        System.out.println("Выберите номер столбца, который хотите добавить в таблицу");
-        int additionNumber = 2;
-        System.out.println("Выберите номер столбца, по которому будет " +
-                "происходить мерж:");
-        int mergingNumber = 1;
+        System.out.println(
+                ConsoleConstants.ADDITION_COLUMN_NUMBER);
+        int additionNumber = in.nextInt();
+       // int additionNumber = 2;
+        System.out.println(ConsoleConstants.MERGE_COLUMN_NUMBER);
+        int mergingNumber = in.nextInt();
+        //int mergingNumber = 1;
 
         showTableHeader(myExcelSheet);
-        System.out.println("Выберите номер столбца, по которому будет " +
-                "происходить мерж:");
-        int mainMergingNumber = 1;
-
+        System.out.println(ConsoleConstants.MERGE_COLUMN_NUMBER);
+        int mainMergingNumber = in.nextInt();
+       // int mainMergingNumber = 1;
 
         consolidationWorker.mergeContentIntoTable
                 (myExcelSheet, myExcelSheet2, mainMergingNumber,
-                        mergingNumber , additionNumber);
+                        mergingNumber, additionNumber);
 
         log.info("Files  merged");
         saveFileByInputName(xssfWorkbook);
@@ -117,7 +130,12 @@ public class Application {
                         "/resources/tab2.xlsx";
 
         //Введите номер листа начиная с 0
-        XSSFWorkbook xssfWorkbook = fileWorker.readExcelBook(mainFile);
+        XSSFWorkbook xssfWorkbook = null;
+        try {
+            xssfWorkbook = fileWorker.readExcelBook(mainFile);
+        } catch (ConsoleException e) {
+            System.out.println(e.getMessage());
+        }
         XSSFSheet myExcelSheet = xssfWorkbook.getSheetAt(0);
         log.info("File prepared  for transliteration");
         //Выберите номер столбца, который хотите транслитерировать
@@ -130,25 +148,31 @@ public class Application {
 
     }
 
-    private void saveFileByInputName(XSSFWorkbook workbook){
+    private void saveFileByInputName(XSSFWorkbook workbook) {
         //Введите имя, под каким сохранть файл
-        String fileName = "merge";
+        Scanner in = new Scanner(System.in);
+        System.out.println(ConsoleConstants.FILE_SAVE);
+        String fileName = in.nextLine();
         fileName += ConsoleConstants.FILE_EXTENSION;
-        fileWorker.saveExcelBook(workbook, fileName);
-        log.info("File was saving with name "+ fileName);
+        try {
+            fileWorker.saveExcelBook(workbook, fileName);
+        } catch (ConsoleException e) {
+            System.out.println(e.getMessage());
+        }
+        log.info("File was saving with name " + fileName);
     }
 
     private void showTableHeader(XSSFSheet sheet) {
-    System.out.println("##########################");
-    XSSFRow row = sheet.getRow(ConsoleConstants.ZERO);
-    Iterator cellIter = row.cellIterator();
-    int counter = 0;
-    while (cellIter.hasNext()) {
-        XSSFCell cell = (XSSFCell) cellIter.next();
-        System.out.println(counter + "-" + cell.getStringCellValue());
-        counter++;
+        System.out.println("##########################");
+        XSSFRow row = sheet.getRow(ConsoleConstants.ZERO);
+        Iterator cellIter = row.cellIterator();
+        int counter = 0;
+        while (cellIter.hasNext()) {
+            XSSFCell cell = (XSSFCell) cellIter.next();
+            System.out.println(counter + "-" + cell.getStringCellValue());
+            counter++;
+        }
+        System.out.println("##########################");
     }
-    System.out.println("##########################");
-}
 
 }

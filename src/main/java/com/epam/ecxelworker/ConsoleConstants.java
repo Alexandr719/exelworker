@@ -25,5 +25,22 @@ public class ConsoleConstants {
     public static final int ZERO = 0;
 
     public static final String FILE_EXTENSION = ".xlsx";
+    public static final String FILE_SAVE = "Введите имя, под каким сохранть " +
+            "файл (пример file1):";
+    public static final String MERGE_COLUMN_NUMBER =
+            "Выберите номер столбца, по которому будет " +
+                    "происходить мерж:";
+    public static final String ADDITION_COLUMN_NUMBER = "Выберите номер " +
+            "столбца, который хотите добавить в таблицу:";
+
+
+    public static final String FILE_1_PATH_EXTENSION =
+            "D:/Filatov/geekenglish/ecxelworker/src/main/resources" +
+                    "/tab2.xlsx";
+
+    public static final String FILE_2_PATH_EXTENSION =
+            "D:/Filatov/geekenglish/ecxelworker/src/main/resources" +
+                    "/tab1.xlsx";
+
 
 }
