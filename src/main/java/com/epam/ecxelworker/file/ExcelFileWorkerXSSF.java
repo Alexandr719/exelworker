@@ -15,25 +15,28 @@ import java.io.IOException;
 public class ExcelFileWorkerXSSF implements ExcelFileWorker {
 
     public XSSFWorkbook readExcelBook(String filePath) throws ConsoleException {
-        XSSFWorkbook excelBook = null;
+        XSSFWorkbook excelBook;
         try {
             excelBook = new XSSFWorkbook(new FileInputStream
                     (filePath));
         } catch (IOException e) {
             log.error("Error with reading book", e);
-            throw new ConsoleException("Неверный путь до файла");
+            throw new ConsoleException("Неверный путь до файл, возможно файл " +
+                    "открыт в другой программе");
         }
         return excelBook;
     }
 
-    public void saveExcelBook(XSSFWorkbook workbook, String fileName) throws ConsoleException {
+    public void saveExcelBook(XSSFWorkbook workbook, String fileName)
+            throws ConsoleException {
         try {
             FileOutputStream fileOut = new FileOutputStream(fileName);
             workbook.write(fileOut);
             fileOut.close();
         } catch (IOException e) {
             log.error("Error with saving book", e);
-            throw new ConsoleException("Не удалось сохранить файл");
+            throw new ConsoleException("Не удалось сохранить файл, возможно " +
+                    "файл открыт в другой программе");
 
         }
     }

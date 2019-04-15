@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.util.Iterator;
 import java.util.Scanner;
 
@@ -48,7 +47,7 @@ public class Application {
             case ConsoleConstants.DEFAULTRUN:
                 System.out.println("Вы выбрали" +
                         ConsoleConstants.DEFAULTRUN_MESSAGE);
-               stratDefaultTransliterAndMegre();
+               startDefaultTransliterAndMegre();
                 break;
             case ConsoleConstants.EXIT:
                 System.out.println(ConsoleConstants.BYE);
@@ -65,7 +64,7 @@ public class Application {
         }
     }
 
-    private void stratDefaultTransliterAndMegre() {
+    private void startDefaultTransliterAndMegre() {
         Scanner in = new Scanner(System.in);
         //Read first file
         System.out.print(ConsoleConstants.ENTET_FULL_PATH);
@@ -102,7 +101,6 @@ public class Application {
         saveFileByInputName(xssfWorkbook);
 
     }
-
 
     private void showEvents() {
         System.out.println(ConsoleConstants.APP_NAME);
