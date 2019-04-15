@@ -5,11 +5,15 @@ public class ConsoleConstants {
     public final static int EXIT = 0;
     public final static int MERGE = 1;
     public final static int TRANSLITERATION = 2;
+    public final static int DEFAULTRUN = 3;
+
 
     public final static String CHOOSE_ACTION = "Выберите действие:";
 
     public final static String EXIT_MESSAGE = " - выход";
     public final static String MERGE_MESSAGE = " - смержить 2 таблицы в одну";
+    public final static String DEFAULTRUN_MESSAGE = " - быстрый запуск " +
+            "(столбцы и строки по умолчанию)";
     public final static String TRANSLITERATION_MESSAGE = " - " +
             "транслитерировать поля";
 
@@ -25,6 +29,34 @@ public class ConsoleConstants {
     public static final int ZERO = 0;
 
     public static final String FILE_EXTENSION = ".xlsx";
+    public static final String APP_NAME = "   ::::::- -:.    -:.   .:++:.  .::::::. .:-          -:.   -:. -:.  ::      ::      -::::::  .::::-.      \n" +
+            "  .#%..... .@#-  +#:  -# :..-%+ *#:..... .#%          =#. .  -  =#.  @       @       @ .....  *#:..+#%     \n" +
+            "  .#%        =#:%#-  .#@        *#:      .#%          =#.=#*    =#.  @       @       @        *#:   @ .    \n" +
+            "  .######.    +##.   :#+        *#####=  .#%          =# #.     =#.  @       @       @#####-  *#####+.     \n" +
+            "  .#%        *#:@#.  -#%        *#:      .#%          =#.+#+    =#.  @       @       @        *#:  %#-     \n" +
+            "  .#%       %#-  %#-  +#=.  .:* *#:      .#%          =#. .  .  =#.  @       @       @        *#:   @#.    \n" +
+            "  .%@@@@@= +%.    +@-  .+@# %:. :@@@@@@: .%@@@@@-     +%.   *@- +%.  =@@@@@* =@@@@@* =@@@@@%. :@-   .%+  ";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public static final String FILE_SAVE = "Введите имя, под каким сохранть " +
             "файл (пример file1):";
     public static final String MERGE_COLUMN_NUMBER =
@@ -44,4 +76,9 @@ public class ConsoleConstants {
 
 public static final String TRANSLITERATION_COLUMN_NUMBER = "Выберите номер " +
         "столбца, который хотите транслитерировать:";
+
+
+
+
+
 }

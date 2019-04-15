@@ -12,6 +12,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.Iterator;
 import java.util.Scanner;
 
@@ -43,22 +45,76 @@ public class Application {
                         ConsoleConstants.TRANSLITERATION_MESSAGE);
                 startTransliteration();
                 break;
+            case ConsoleConstants.DEFAULTRUN:
+                System.out.println("Вы выбрали" +
+                        ConsoleConstants.DEFAULTRUN_MESSAGE);
+               stratDefaultTransliterAndMegre();
+                break;
             case ConsoleConstants.EXIT:
                 System.out.println(ConsoleConstants.BYE);
                 break;
             default:
                 break;
         }
+        System.out.println("Нажмите любую клавишу, чтобы выйти");
+        try {
+           System.in.read();
+            System.out.println(ConsoleConstants.BYE);
+        } catch (IOException e) {
+            System.out.println("Что то пошло не так");
+        }
+    }
+
+    private void stratDefaultTransliterAndMegre() {
+        Scanner in = new Scanner(System.in);
+        //Read first file
+        System.out.print(ConsoleConstants.ENTET_FULL_PATH);
+        String mainFile = in.nextLine();
+
+        XSSFWorkbook xssfWorkbook = null;
+        XSSFSheet myExcelSheet = null;
+        try {
+            xssfWorkbook = fileWorker.readExcelBook(mainFile);
+            myExcelSheet = xssfWorkbook.getSheetAt(0);
+        } catch (ConsoleException e) {
+            System.out.println(e.getMessage());
+        }
+
+        //Read second file
+        System.out.print(ConsoleConstants.ENTET_FULL_PATH);
+        String mergeFile = in.nextLine();
+//        String mergeFile =
+//                ConsoleConstants.FILE_2_PATH_EXTENSION;
+        XSSFWorkbook xssfWorkbook2;
+        XSSFSheet myExcelSheet2 = null;
+        try {
+            xssfWorkbook2 = fileWorker.readExcelBook(mergeFile);
+            myExcelSheet2 = xssfWorkbook2.getSheetAt(0);
+        } catch (ConsoleException e) {
+            System.out.println(e.getMessage());
+        }
+        log.info("All files prepared  for merge");
+
+        consolidationWorker.mergeContentIntoTable
+                (myExcelSheet, myExcelSheet2, 1,
+                        1, 2);
+        transliterator.transliterateExcelColumn(myExcelSheet, 2);
+        saveFileByInputName(xssfWorkbook);
 
     }
 
 
     private void showEvents() {
+        System.out.println(ConsoleConstants.APP_NAME);
+        System.out.println("\n");
         System.out.println(ConsoleConstants.CHOOSE_ACTION);
         System.out.println(
                 ConsoleConstants.MERGE + ConsoleConstants.MERGE_MESSAGE);
         System.out.println(ConsoleConstants.TRANSLITERATION +
                 ConsoleConstants.TRANSLITERATION_MESSAGE);
+        System.out
+                .println(ConsoleConstants.DEFAULTRUN + ConsoleConstants
+                        .DEFAULTRUN_MESSAGE);
         System.out
                 .println(ConsoleConstants.EXIT + ConsoleConstants.EXIT_MESSAGE);
 
@@ -177,7 +233,7 @@ public class Application {
         int counter = 0;
         while (cellIter.hasNext()) {
             XSSFCell cell = (XSSFCell) cellIter.next();
-            System.out.println(counter + "-" + cell.getStringCellValue());
+            System.out.println(counter + " - " + cell.getStringCellValue());
             counter++;
         }
         System.out.println("##########################");
